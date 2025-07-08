@@ -19,26 +19,22 @@ public class UpdateProfileServlet extends HttpServlet {
         String displayName = request.getParameter("displayName");
 
         Part filePart = request.getPart("avatar");
-        String fileName = Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-
         String avatarPath = null;
-        if (fileName != null && !fileName.isEmpty()) {
-            String uploadPath = getServletContext().getRealPath("/") + "images/user";
-            File uploadDir = new File(uploadPath);
-            if (!uploadDir.exists()) uploadDir.mkdirs();
 
-            avatarPath = "/images/user/" + userId + "_" + fileName;
-            filePart.write(uploadPath + File.separator + userId + "_" + fileName);
+        if (filePart != null && filePart.getSize() > 0) {
+            String fileName = userId + "_" + System.currentTimeMillis() + ".png";
+            String uploadPath = getServletContext().getRealPath("/") + "images/user";
+            File dir = new File(uploadPath);
+            if (!dir.exists()) dir.mkdirs();
+
+            avatarPath = "/images/user/" + fileName;
+            filePart.write(uploadPath + File.separator + fileName);
         }
 
         try (Connection conn = DBUtil.getConnection()) {
-            String sql;
-            if (avatarPath != null) {
-                sql = "UPDATE users SET display_name = ?, avatar = ? WHERE id = ?";
-            } else {
-                sql = "UPDATE users SET display_name = ? WHERE id = ?";
-            }
-
+            String sql = avatarPath != null
+                    ? "UPDATE users SET display_name = ?, avatar = ? WHERE id = ?"
+                    : "UPDATE users SET display_name = ? WHERE id = ?";
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, displayName);
             if (avatarPath != null) {
@@ -47,9 +43,8 @@ public class UpdateProfileServlet extends HttpServlet {
             } else {
                 ps.setInt(2, userId);
             }
-
             ps.executeUpdate();
-            ps.close();
+            request.getSession().setAttribute("display_name", displayName);
         } catch (Exception e) {
             throw new ServletException(e);
         }

@@ -25,6 +25,14 @@
     } catch (SQLException e) {
         e.printStackTrace();
     }
+
+    // 防止空路径出错
+    if (avatarPath == null || avatarPath.trim().isEmpty()) {
+        avatarPath = "images/taffy1.jpg"; // 默认头像
+    }
+    if (displayName == null) {
+        displayName = "";
+    }
 %>
 <html>
 <head>
@@ -65,8 +73,10 @@
             margin-bottom: 20px;
         }
         .avatar img {
-            max-width: 120px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -79,19 +89,18 @@
 <div class="profile">
     <h2>个人资料</h2>
     <div class="avatar">
-        <% if (avatarPath != null) { %>
         <img src="<%= avatarPath %>" alt="头像">
-        <% } else { %>
-        <img src="images/default-avatar.png" alt="默认头像">
-        <% } %>
     </div>
     <form action="UpdateProfileServlet" method="post" enctype="multipart/form-data">
         <label>登录用户名：</label><br>
         <input type="text" value="<%= username %>" disabled><br>
+
         <label>昵称：</label><br>
-        <input type="text" name="displayName" value="<%= displayName != null ? displayName : "" %>" required><br>
+        <input type="text" name="displayName" value="<%= displayName %>" required><br>
+
         <label>更换头像：</label><br>
-        <input type="file" name="avatar"><br>
+        <input type="file" name="avatar" accept="image/*"><br>
+
         <input type="submit" value="保存修改">
     </form>
 </div>
