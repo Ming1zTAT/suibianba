@@ -38,6 +38,11 @@
     </style>
 </head>
 <body>
+<div style="position: fixed; top: 10px; left: 10px; z-index: 999;">
+    <button onclick="history.back()" style="padding: 6px 12px; font-size: 14px; border-radius: 5px; border: none; background-color: #4CAF50; color: white; cursor: pointer;">
+        ← 返回
+    </button>
+</div>
 <div class="about-container">
     <h2>💖 永雏塔菲简介</h2>
     <p>

@@ -7,98 +7,104 @@
   }
   int userId = (int) session.getAttribute("userId");
   String username = (String) session.getAttribute("username");
-  boolean isAdmin = session.getAttribute("adminMode") != null;
+
+  String selectedChatUserIdParam = request.getParameter("chatWith");
+  int chatWithId = selectedChatUserIdParam != null ? Integer.parseInt(selectedChatUserIdParam) : -1;
 %>
-<!DOCTYPE html>
 <html>
 <head>
-  <title>聊天室 - 共产国际</title>
+  <title>聊天室</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      font-family: "Segoe UI", sans-serif;
+      font-family: Arial, sans-serif;
       background: url('images/chat/background.png') repeat;
-      background-size: cover;
+      height: 100vh;
     }
     .container {
       display: flex;
       height: 100vh;
-      width: 100vw;
-      overflow: hidden;
     }
     .sidebar {
-      width: 260px;
-      background-color: rgba(255, 255, 255, 0.9);
+      width: 280px;
+      background-color: #e6e6e6;
       border-right: 1px solid #ccc;
       padding: 20px;
+      overflow-y: auto;
     }
-    .group {
-      padding: 12px 16px;
+    .group, .friend {
       background-color: #fff;
-      border-radius: 10px;
+      padding: 12px;
       margin-bottom: 10px;
-      font-weight: bold;
-      color: #333;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 1px 1px 4px rgba(0,0,0,0.1);
     }
+    .group:hover, .friend:hover {
+      background-color: #d4f1ff;
+    }
+
     .chat-area {
       flex: 1;
       display: flex;
       flex-direction: column;
+      background-color: rgba(255,255,255,0.9);
     }
+
     .chat-header {
-      padding: 16px;
-      background-color: rgba(255, 255, 255, 0.9);
-      font-size: 20px;
-      font-weight: bold;
+      padding: 15px 20px;
       border-bottom: 1px solid #ccc;
+      font-weight: bold;
+      font-size: 18px;
+      background-color: #f8f8f8;
     }
+
     .chat-messages {
       flex: 1;
-      overflow-y: auto;
       padding: 20px;
+      overflow-y: auto;
     }
+
     .message {
-      background-color: rgba(255,255,255,0.95);
-      border-radius: 10px;
-      padding: 12px 16px;
       margin-bottom: 15px;
-      max-width: 65%;
+      background-color: #ffffffcc;
+      border-radius: 10px;
+      padding: 10px 15px;
+      max-width: 70%;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
+
     .from {
       font-weight: bold;
-      color: #0088cc;
+      color: #2f4f4f;
     }
+
     .timestamp {
       font-size: 0.8em;
-      color: #888;
-      margin-top: 5px;
+      color: #999;
     }
-    .message img {
-      max-width: 200px;
-      max-height: 200px;
-      display: block;
-      margin-top: 8px;
-      border-radius: 5px;
-    }
+
     .chat-form {
       display: flex;
-      align-items: center;
       gap: 10px;
       padding: 15px 20px;
-      background-color: rgba(255,255,255,0.9);
       border-top: 1px solid #ccc;
+      background-color: #f9f9f9;
     }
+
     .chat-form input[type="text"] {
       flex: 1;
       padding: 10px;
       border-radius: 20px;
       border: 1px solid #ccc;
-      outline: none;
     }
+
+    .chat-form input[type="file"] {
+      border: none;
+    }
+
     .chat-form input[type="submit"] {
-      padding: 8px 20px;
+      padding: 10px 18px;
       background-color: #0088cc;
       color: white;
       border: none;
@@ -106,103 +112,116 @@
       font-weight: bold;
       cursor: pointer;
     }
-    .chat-form input[type="submit"]:hover {
-      background-color: #0073a8;
-    }
-    .delete-btn {
-      float: right;
-      color: red;
-      background: none;
-      border: none;
-      cursor: pointer;
+
+    .message img {
+      max-width: 200px;
+      border-radius: 8px;
+      margin-top: 8px;
     }
   </style>
 </head>
-<script>
-  // 页面加载后滚动到底部
-  window.onload = function () {
-    const chatBox = document.getElementById("chat-messages");
-    if (chatBox) {
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-  };
-</script>
-<script>
-  let inputBuffer = "";
-
-  document.addEventListener("keydown", function (e) {
-    const key = e.key.toLowerCase();
-
-    if (/^[a-z]$/.test(key)) {
-      inputBuffer += key;
-
-      if (inputBuffer.endsWith("delete")) {
-        fetch("EnableAdminServlet").then(() => location.reload());
-      }
-
-      if (inputBuffer.endsWith("exitdelete")) {
-        fetch("DisableAdminServlet").then(() => location.reload());
-      }
-
-      if (inputBuffer.length > 20) {
-        inputBuffer = inputBuffer.slice(-20); // 控制缓存长度
-      }
-    }
-  });
-</script>
-
-
 <body>
+<div style="position: fixed; top: 10px; right: 10px; z-index: 999;">
+  <button onclick="location.href='home.jsp'" style="padding: 6px 12px; font-size: 14px; border-radius: 5px; border: none; background-color: #4CAF50; color: white; cursor: pointer;">
+    ← 返回
+  </button>
+</div>
 <div class="container">
-  <!-- 左侧群组 -->
+  <!-- 左侧好友栏 -->
   <div class="sidebar">
-    <div class="group">👥 共产国际</div>
+    <div class="group" onclick="location.href='chat.jsp?chatWith=-1'">👥 群组：共产国际</div>
+    <hr>
+    <h4>好友列表</h4>
+    <%
+      Connection conn = DBUtil.getConnection();
+      PreparedStatement ps = conn.prepareStatement(
+                      "SELECT u.id, u.username FROM users u " +
+                              "WHERE u.id IN ( " +
+                              "    SELECT friend_id FROM friends WHERE user_id = ? " +
+                              "    UNION " +
+                              "    SELECT user_id FROM friends WHERE friend_id = ? " +
+                              ")"
+              );
+      ps.setInt(1, userId);
+      ps.setInt(2, userId);
+      ResultSet frs = ps.executeQuery();
+      while (frs.next()) {
+        int fid = frs.getInt("id");
+        String fname = frs.getString("username");
+    %>
+    <div class="friend" onclick="location.href='chat.jsp?chatWith=<%=fid%>'">💬 <%= fname %></div>
+    <%
+      }
+      frs.close();
+      ps.close();
+    %>
   </div>
 
-  <!-- 右侧聊天 -->
+  <!-- 聊天区域 -->
   <div class="chat-area">
-    <div class="chat-header">👥 群聊：共产国际</div>
-
-    <div class="chat-messages" id="chat-messages">
+    <div class="chat-header">
       <%
-        Connection conn = DBUtil.getConnection();
-        PreparedStatement ps = conn.prepareStatement(
-                "SELECT c.*, u.username FROM chat_messages c JOIN users u ON c.user_id = u.id ORDER BY c.timestamp ASC"
-        );
-        ResultSet rs = ps.executeQuery();
-        while (rs.next()) {
-          String msgUser = rs.getString("username");
-          String content = rs.getString("content");
-          String image = rs.getString("image_url");
-          Timestamp time = rs.getTimestamp("timestamp");
-          int msgId = rs.getInt("id");
+        if (chatWithId == -1) {
+          out.print("群聊：共产国际");
+        } else {
+          PreparedStatement p = conn.prepareStatement("SELECT username FROM users WHERE id=?");
+          p.setInt(1, chatWithId);
+          ResultSet r = p.executeQuery();
+          if (r.next()) out.print("私聊：" + r.getString("username"));
+          r.close(); p.close();
+        }
       %>
-      <div class="message">
-
-        <span class="from"><%= msgUser %></span>
-        <% if (isAdmin) { %>
-        <form method="post" action="DeleteChatServlet" style="display:inline;">
-          <input type="hidden" name="id" value="<%= msgId %>">
-          <button type="submit" class="delete-btn">删除</button>
-        </form>
-        <% } %>
-        <div><%= content != null ? content : "" %></div>
-        <% if (image != null && !image.isEmpty()) { %>
-        <img src="<%= image %>" alt="图片">
-        <% } %>
-        <div class="timestamp"><%= time.toString() %></div>
-      </div>
-      <% } rs.close(); ps.close(); conn.close(); %>
     </div>
 
+    <div class="chat-messages" id="chatBox">
+      <%
+        PreparedStatement ps2;
+        if (chatWithId == -1) {
+          ps2 = conn.prepareStatement(
+                  "SELECT c.*, u.username FROM chat_messages c JOIN users u ON c.user_id = u.id WHERE c.receiver_id IS NULL ORDER BY c.timestamp ASC"
+          );
+        } else {
+          ps2 = conn.prepareStatement(
+                  "SELECT c.*, u.username FROM chat_messages c JOIN users u ON c.user_id = u.id " +
+                          "WHERE (c.user_id=? AND c.receiver_id=?) OR (c.user_id=? AND c.receiver_id=?) ORDER BY c.timestamp ASC"
+          );
+          ps2.setInt(1, userId);
+          ps2.setInt(2, chatWithId);
+          ps2.setInt(3, chatWithId);
+          ps2.setInt(4, userId);
+        }
+        ResultSet rs = ps2.executeQuery();
+        while (rs.next()) {
+      %>
+      <div class="message">
+        <span class="from"><%= rs.getString("username") %></span><br>
+        <%= rs.getString("content") != null ? rs.getString("content") : "" %>
+        <% if (rs.getString("image_url") != null && !rs.getString("image_url").isEmpty()) { %>
+        <br><img src="<%= rs.getString("image_url") %>" alt="图">
+        <% } %>
+        <div class="timestamp"><%= rs.getTimestamp("timestamp") %></div>
+      </div>
+      <%
+        }
+        rs.close(); ps2.close(); conn.close();
+      %>
+    </div>
+
+    <!-- 消息输入区域 -->
     <form class="chat-form" method="post" action="ChatServlet" enctype="multipart/form-data">
-      <input type="text" name="content" placeholder="输入消息..." >
+      <input type="text" name="content" placeholder="输入消息...">
+      <input type="hidden" name="chatWithId" value="<%= chatWithId %>">
       <input type="file" name="image">
       <input type="submit" value="发送">
     </form>
+
   </div>
 </div>
 
+<script>
+  // 页面加载后滚动到底部
+  const chatBox = document.getElementById("chatBox");
+  chatBox.scrollTop = chatBox.scrollHeight;
+</script>
 </body>
-
 </html>

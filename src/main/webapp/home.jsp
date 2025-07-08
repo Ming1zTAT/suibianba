@@ -113,6 +113,14 @@
 
 
 <body>
+<!-- 退出登录按钮 -->
+<div style="position: fixed; top: 10px; left: 10px; z-index: 999;">
+    <form action="logout" method="get">
+        <button type="submit" style="padding: 6px 12px; font-size: 14px; border-radius: 5px; border: none; background-color: #f44336; color: white; cursor: pointer;">
+            退出登录
+        </button>
+    </form>
+</div>
 <div style="position: absolute; top: 20px; right: 30px;">
     <form action="profile.jsp" method="get">
         <input type="submit" value="个人中心" style="padding: 6px 12px; border-radius: 20px; border: none; background-color: #0088cc; color: white; font-weight: bold;">
@@ -146,31 +154,103 @@
         <h3>💬 留言板</h3>
         <ul class="message-list">
             <%
-                try (Connection conn = DBUtil.getConnection()) {
-                    String query = "SELECT posts.content, posts.created_at, posts.likes, users.username " +
-                            "FROM posts " +
-                            "JOIN users ON posts.user_id = users.id " +
-                            "WHERE posts.status = 'active' " +
-                            "ORDER BY posts.created_at DESC";
-                    PreparedStatement ps = conn.prepareStatement(query);
-                    ResultSet rs = ps.executeQuery();
-                    while (rs.next()) {
+                Connection conn = DBUtil.getConnection();
+                PreparedStatement ps = conn.prepareStatement(
+                        "SELECT p.*, u.username FROM posts p JOIN users u ON p.user_id = u.id ORDER BY p.created_at DESC"
+                );
+
+
+                ResultSet rs = ps.executeQuery();
+                while (rs.next()) {
+                    int posterId = rs.getInt("user_id");
+                    String posterName = rs.getString("username");
+                    String content = rs.getString("content");
+                    Timestamp time = rs.getTimestamp("created_at");
+
             %>
-            <li>
-                <div class="message-item">
-                    <div class="username"><strong><%= rs.getString("username") %>：</strong></div>
-                    <div class="content"><%= rs.getString("content") %></div>
-                    <div class="time">🕒 <%= rs.getTimestamp("created_at") %></div>
-                    <div class="likes">👍 <%= rs.getInt("likes") %> 赞</div>
-                </div>
+            <li class="message-item">
+                <div class="username" onclick="showUserOptions(<%= posterId %>, '<%= posterName %>', event)"><%= posterName %></div>
+                <div class="message-content"><%= content %></div>
+                <div class="message-time"><%= time %></div>
             </li>
+
             <%
-                    }
-                } catch (Exception e) {
-                    out.println("<li style='color:red;'>留言加载失败：" + e.getMessage() + "</li>");
                 }
+                rs.close();
+                ps.close();
+                conn.close();
             %>
         </ul>
+
+        <div id="user-options-popup" style="display:none; position:absolute; background:#fff; border:1px solid #ccc; padding:10px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.2); z-index:1000;">
+            <button onclick="reportUser()">举报</button>
+            <button onclick="addFriend(selectedUserId)">添加好友</button>
+        </div>
+
+        <script>
+            let selectedUserId = null;
+
+            // 弹出菜单时记录点击的用户ID
+            function showUserOptions(userId, username, event) {
+                selectedUserId = userId;
+
+                const popup = document.getElementById("user-options-popup");
+                popup.style.display = "block";
+                popup.style.left = event.pageX + "px";
+                popup.style.top = event.pageY + "px";
+            }
+
+            function addFriend(friendId) {
+                console.log("添加好友触发，ID=", friendId); // <-- 增加调试
+                if (!friendId || isNaN(friendId)) {
+                    alert("❌ 无效的用户ID，无法添加好友！");
+                    return;
+                }
+
+                fetch('AddFriendServlet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: 'friendId=' + encodeURIComponent(friendId)
+                })
+                    .then(response => response.text())
+                    .then(text => {
+                        console.log("服务器返回内容：", text);
+                        text = text.trim();
+                        if (text === 'success') {
+                            alert("✅ 添加好友成功！");
+                        } else if (text === 'already') {
+                            alert("⚠️ 你们已经是好友了！");
+                        } else {
+                            alert("❌ 添加失败！无法添加自己为好友！");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("添加好友请求失败：", error);
+                        alert("⚠️ 请求失败！");
+                    });
+            }
+        </script>
+
+        </div>
+
+        <script>
+
+            function reportUser() {
+                alert("已收到举报，我们将尽快处理！");
+                document.getElementById("user-options-popup").style.display = "none";
+            }
+
+            // 点击外部关闭弹窗
+            document.addEventListener("click", function(e) {
+                const popup = document.getElementById("user-options-popup");
+                if (!popup.contains(e.target) && !e.target.classList.contains("username")) {
+                    popup.style.display = "none";
+                }
+            });
+        </script>
+
 
         <div style="text-align: center; margin: 30px 0;">
             <a href="quiz.jsp" class="btn-about">🎮 粉丝知识小测试</a>
