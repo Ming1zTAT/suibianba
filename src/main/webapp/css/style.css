@@ -58,6 +58,7 @@ textarea {
     border-radius: 10px;
     font-size: 14px;
     transition: all 0.2s ease;
+    resize: none;
 }
 
 input[type="text"]:focus,
@@ -66,6 +67,7 @@ textarea:focus {
     outline: none;
     border-color: #e84d9a;
     box-shadow: 0 0 5px rgba(232, 77, 154, 0.3);
+
 }
 
 input[type="submit"] {
@@ -119,15 +121,18 @@ a:hover {
     margin-top: 20px;
     padding: 20px;
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    resize:none;
 }
 
 .message-board h3 {
     color: #e84d9a;
     margin-bottom: 15px;
+    resize:none;
 }
 
 .message-list {
     list-style: none;
+    resize:none;
     padding: 0;
 }
 
@@ -138,25 +143,30 @@ a:hover {
     border-radius: 8px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.05);
     transition: transform 0.2s ease;
+    resize:none;
 }
 
 .message-list li:hover {
     transform: scale(1.02);
+    resize:none;
 }
 
 .message-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    resize:none;
 }
 
 .message-item .content {
     width: 80%;
+    resize:none;
 }
 
 .message-item .time {
     color: #aaa;
     font-size: 12px;
+    resize:none;
 }
 .btn-about {
     display: inline-block;
@@ -204,6 +214,9 @@ a:hover {
     transform: scale(1.05);
 }
 /* =====================================*/
+textarea {
+    resize: none !important;
+}
 
 
 

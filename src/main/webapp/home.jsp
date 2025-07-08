@@ -21,7 +21,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>永雏塔菲后援会</title>
+    <title>GramTele</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <script>
@@ -123,19 +123,47 @@
 </div>
 <div style="position: absolute; top: 20px; right: 30px;">
     <form action="profile.jsp" method="get">
-        <input type="submit" value="个人中心" style="padding: 6px 12px; border-radius: 20px; border: none; background-color: #0088cc; color: white; font-weight: bold;">
+        <style>
+            .action-button {
+                padding: 6px 12px;
+                border-radius: 20px;
+                border: none;
+                background-color: #0088cc;
+                color: white;
+                font-weight: bold;
+                margin: 8px 6px;
+                cursor: pointer;
+                transition: background-color 0.3s;
+            }
+
+            .action-button:hover {
+                background-color: #005f99;
+            }
+        </style>
+
+        <div style="text-align:center;">
+            <!-- 个人中心 -->
+            <input type="submit" value="个人中心" class="action-button">
+
+            <!-- 显示图片 -->
+            <input type="button" value="打赏" class="action-button" onclick="showImagePopup()">
+
+            <!-- 跳转链接 -->
+            <input type="button" value="去异世界" class="action-button" onclick="goToWebsite()">
+        </div>
+
     </form>
 </div>
 
 <div class="container">
     <h2>🎉 欢迎，<%= username %>！</h2>
-    <p style="text-align:center; color:#888;">你已成功加入永雏塔菲后援会 🧁</p>
+    <p style="text-align:center; color:#888;">你已成功登入GramTele 🧁</p>
     <div id="countdown" style="text-align: center; font-size: 18px; margin: 20px auto; padding: 10px; background-color: #fff8f8; border-radius: 8px; border: 1px solid #ffd6e0;">
         🎂 正在加载倒计时...
     </div>
 
     <div style="text-align: center; margin-bottom: 20px;">
-        <a href="about.jsp" class="btn-about">了解永雏塔菲</a>
+        <a href="about.jsp" class="btn-about">了解我们</a>
     </div>
 
     <div class="chat-entry">
@@ -144,15 +172,19 @@
 
 
     <!-- 留言发布表单 -->
+
     <form method="post" action="postMessage">
         <textarea name="content" rows="4" placeholder="说点什么..."></textarea>
         <input type="submit" value="发布">
     </form>
 
+
     <!-- 留言展示区域 -->
+
     <div class="message-board">
         <h3>💬 留言板</h3>
         <ul class="message-list">
+
             <%
                 Connection conn = DBUtil.getConnection();
                 PreparedStatement ps = conn.prepareStatement(
@@ -257,6 +289,7 @@
         </div>
 
 
+
     </div>
     <!-- 应援图墙区域 -->
     <div class="gallery-section">
@@ -270,6 +303,27 @@
         </div>
     </div>
 
+<!-- 图片弹出框 -->
+<div id="imagePopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
+    background:#fff; padding:20px; border-radius:10px; box-shadow:0 0 10px rgba(0,0,0,0.3); z-index:10000;">
+    <img src="images/IMG_4120.JPG" alt="示例图片" style="max-width:100%; max-height:80vh;">
+    <div style="text-align:center; margin-top:10px;">
+        <button onclick="closeImagePopup()" style="padding: 6px 12px; border-radius: 20px; border: none; background-color: #666; color: white; font-weight: bold;">关闭</button>
+    </div>
+</div>
+
+<script>
+    function showImagePopup() {
+        document.getElementById("imagePopup").style.display = "block";
+    }
+    function closeImagePopup() {
+        document.getElementById("imagePopup").style.display = "none";
+    }
+    function goToWebsite() {
+            window.location.href = "https://ys.mihoyo.com/";
+
+    }
+</script>
 
 
 </div>

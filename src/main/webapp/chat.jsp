@@ -178,11 +178,11 @@
         PreparedStatement ps2;
         if (chatWithId == -1) {
           ps2 = conn.prepareStatement(
-                  "SELECT c.*, u.username FROM chat_messages c JOIN users u ON c.user_id = u.id WHERE c.receiver_id IS NULL ORDER BY c.timestamp ASC"
+                  "SELECT c.*, u.username, u.display_name FROM chat_messages c JOIN users u ON c.user_id = u.id WHERE c.receiver_id IS NULL ORDER BY c.timestamp ASC"
           );
         } else {
           ps2 = conn.prepareStatement(
-                  "SELECT c.*, u.username FROM chat_messages c JOIN users u ON c.user_id = u.id " +
+                  "SELECT c.*, u.username, u.display_name FROM chat_messages c JOIN users u ON c.user_id = u.id " +
                           "WHERE (c.user_id=? AND c.receiver_id=?) OR (c.user_id=? AND c.receiver_id=?) ORDER BY c.timestamp ASC"
           );
           ps2.setInt(1, userId);
@@ -190,11 +190,17 @@
           ps2.setInt(3, chatWithId);
           ps2.setInt(4, userId);
         }
+
         ResultSet rs = ps2.executeQuery();
         while (rs.next()) {
       %>
       <div class="message">
-        <span class="from"><%= rs.getString("username") %></span><br>
+        <%
+          String displayName = rs.getString("display_name");
+          String senderName = (displayName != null && !displayName.isEmpty()) ? displayName : rs.getString("username");
+        %>
+        <span class="from"><%= senderName %></span><br>
+
         <%= rs.getString("content") != null ? rs.getString("content") : "" %>
         <% if (rs.getString("image_url") != null && !rs.getString("image_url").isEmpty()) { %>
         <br><img src="<%= rs.getString("image_url") %>" alt="图">
