@@ -27,7 +27,7 @@ public class UpdateProfileServlet extends HttpServlet {
             File dir = new File(uploadPath);
             if (!dir.exists()) dir.mkdirs();
 
-            avatarPath = "/images/user/" + fileName;
+            avatarPath = "images/user/" + fileName;
             filePart.write(uploadPath + File.separator + fileName);
         }
 
