@@ -172,14 +172,14 @@ a:hover {
     display: inline-block;
     margin-bottom: 20px;
     padding: 8px 20px;
-    background-color: #ff69b4;
+    background-color: #0d4185;
     color: white;
     text-decoration: none;
     border-radius: 5px;
     font-weight: bold;
 }
 .btn-about:hover {
-    background-color: #ff85c1;
+    background-color: #69f2ff;
 }
 .username {
     font-weight: bold;

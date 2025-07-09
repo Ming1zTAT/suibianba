@@ -5,6 +5,7 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+
 <div class="container">
     <h2>🎀 粉丝注册</h2>
     <%-- 显示提示信息 --%>
@@ -22,5 +23,6 @@
     </form>
     <a href="login.jsp">已有账号？去登录</a>
 </div>
+
 </body>
 </html>

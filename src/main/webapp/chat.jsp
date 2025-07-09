@@ -290,7 +290,7 @@
   });
 </script>
 
-<div style="position: absolute; top: 10px; left: 10px;">
+<div style="position: absolute; top: 10px; right: 10px;">
   <button onclick="location.href='home.jsp'" style="padding: 8px 16px; border-radius: 6px; background-color: #0088cc; color: white; border: none; font-weight: bold; cursor: pointer;">
     🏠 返回主页
   </button>

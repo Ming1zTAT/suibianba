@@ -44,12 +44,12 @@
     </button>
 </div>
 <div class="about-container">
-    <h2>💖 永雏塔菲简介</h2>
+    <h2>💖 简介</h2>
     <p>
-        永雏塔菲是一位活泼可爱、充满魅力的虚拟偶像，她以甜美的嗓音和治愈的气质俘获了大量粉丝。<br>
-        她常在 B 站直播，分享游戏、唱歌和互动等内容，是粉丝们心中的“小太阳”。关注永雏塔菲谢谢喵！
+        Gramtele 是一个面向全球的完全自由的聊天软件，可以加入群组，发起私聊，添加好友等，<br>。
     </p>
-    <a class="btn-link" href="https://space.bilibili.com/1265680561" target="_blank">B站主页</a>
+    <a class="btn-link" href="https://space.bilibili.com/304510678" target="_blank">B站主页</a>
 </div>
+
 </body>
 </html>

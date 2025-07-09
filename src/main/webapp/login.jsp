@@ -1,24 +1,14 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
 <head>
+
     <title>用户登录</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<script>
-    let keyBuffer = "";
-
-    document.addEventListener("keydown", function(e) {
-        keyBuffer += e.key.toLowerCase();
-        if (keyBuffer.length > 10) {
-            keyBuffer = keyBuffer.slice(-10); // 限制长度
-        }
-        if (keyBuffer.includes("admin")) {
-            window.location.href = "admin.jsp";
-        }
-    });
-</script>
 
 <body>
+
+
 
 <div class="container">
     <h2>🎤 登录聊天室</h2>
@@ -45,5 +35,6 @@
     </form>
     <a href="register.jsp">还没有账号？立即注册</a>
 </div>
+
 </body>
 </html>

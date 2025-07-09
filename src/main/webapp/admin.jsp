@@ -1,83 +1,106 @@
+<%@ page import="java.sql.*, com.example.yytfsupportsite.yytf.util.DBUtil" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ page import="java.sql.*,com.example.yytfsupportsite.yytf.util.DBUtil"%>
+<%
+  Connection conn = DBUtil.getConnection();
+%>
+
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>管理员后台</title>
+  <title>管理员控制台</title>
   <style>
-    body { font-family: Arial; margin: 20px; }
-    table { width: 90%; border-collapse: collapse; margin-bottom: 40px; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
-    th { background-color: #f2f2f2; }
-    h2 { margin-top: 40px; }
+    body {
+      font-family: Arial;
+      background: #fff3f3;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+      color: #d40000;
+      margin-bottom: 30px;
+    }
+    table {
+      border-collapse: collapse;
+      width: 90%;
+      margin: 20px auto;
+      background: white;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: center;
+    }
+    th {
+      background-color: #f67280;
+      color: white;
+    }
+    button {
+      padding: 6px 10px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .ban { background: #ff5c5c; color: white; }
+    .delete { background: #444; color: white; }
   </style>
 </head>
 <body>
-<div style="position: fixed; top: 10px; left: 10px; z-index: 999;">
-  <button onclick="history.back()" style="padding: 6px 12px; font-size: 14px; border-radius: 5px; border: none; background-color: #4CAF50; color: white; cursor: pointer;">
-    ← 返回
-  </button>
-</div>
-<h1>🛠 管理员后台</h1>
+<h1>管理员控制台</h1>
 
 <!-- 用户管理 -->
-<h2>👤 用户列表</h2>
+<h2 style="text-align:center;">用户管理</h2>
 <table>
-  <tr><th>ID</th><th>用户名</th><th>操作</th></tr>
+  <tr><th>用户名</th><th>昵称</th><th>状态</th><th>操作</th></tr>
   <%
-    try (Connection conn = DBUtil.getConnection()) {
-      Statement stmt = conn.createStatement();
-      ResultSet rs = stmt.executeQuery("SELECT * FROM users");
-      while (rs.next()) {
+    PreparedStatement ps = conn.prepareStatement("SELECT id, username, display_name, is_banned FROM users");
+    ResultSet rs = ps.executeQuery();
+    while (rs.next()) {
   %>
   <tr>
-    <td><%= rs.getInt("id") %></td>
     <td><%= rs.getString("username") %></td>
+    <td><%= rs.getString("display_name") %></td>
+    <td><%= rs.getBoolean("is_banned") ? "禁用中" : "正常" %></td>
     <td>
-      <form method="post" action="deleteUser" onsubmit="return confirm('确定删除该用户？')">
+      <form method="post" action="AdminUserServlet" style="display:inline;">
         <input type="hidden" name="userId" value="<%= rs.getInt("id") %>">
-        <input type="submit" value="删除">
+        <input type="hidden" name="action" value="<%= rs.getBoolean("is_banned") ? "unban" : "ban" %>">
+        <button class="ban"><%= rs.getBoolean("is_banned") ? "解除禁用" : "禁用" %></button>
+      </form>
+      <form method="post" action="AdminUserServlet" style="display:inline;">
+        <input type="hidden" name="userId" value="<%= rs.getInt("id") %>">
+        <input type="hidden" name="action" value="delete">
+        <button class="delete">删除</button>
       </form>
     </td>
   </tr>
-  <%
-      }
-    } catch (Exception e) {
-      out.println("加载用户失败：" + e.getMessage());
-    }
-  %>
+  <% } rs.close(); ps.close(); %>
 </table>
 
-<!-- 留言管理 -->
-<h2>💬 留言列表</h2>
+<!-- 聊天记录管理 -->
+<h2 style="text-align:center;">聊天记录管理</h2>
 <table>
-  <tr><th>ID</th><th>用户</th><th>内容</th><th>时间</th><th>操作</th></tr>
+  <tr><th>发送者ID</th><th>内容</th><th>图片</th><th>时间</th><th>操作</th></tr>
   <%
-    try (Connection conn = DBUtil.getConnection()) {
-      String sql = "SELECT posts.id, users.username, posts.content, posts.created_at " +
-              "FROM posts JOIN users ON posts.user_id = users.id";
-      PreparedStatement ps = conn.prepareStatement(sql);
-      ResultSet rs = ps.executeQuery();
-      while (rs.next()) {
+    ps = conn.prepareStatement("SELECT id, user_id, content, image_url, timestamp FROM chat_messages ORDER BY timestamp DESC LIMIT 50");
+    rs = ps.executeQuery();
+    while (rs.next()) {
   %>
   <tr>
-    <td><%= rs.getInt("id") %></td>
-    <td><%= rs.getString("username") %></td>
-    <td><%= rs.getString("content") %></td>
-    <td><%= rs.getTimestamp("created_at") %></td>
+    <td><%= rs.getInt("user_id") %></td>
+    <td><%= rs.getString("content") == null ? "" : rs.getString("content") %></td>
+    <td><% if (rs.getString("image_url") != null) { %>
+      <img src="<%= rs.getString("image_url") %>" style="width:60px;">
+      <% } else { out.print("无"); } %></td>
+    <td><%= rs.getTimestamp("timestamp") %></td>
     <td>
-      <form method="post" action="deletePost" onsubmit="return confirm('确定删除该留言？')">
-        <input type="hidden" name="postId" value="<%= rs.getInt("id") %>">
-        <input type="submit" value="删除">
+      <form method="post" action="AdminChatServlet">
+        <input type="hidden" name="messageId" value="<%= rs.getInt("id") %>">
+        <button class="delete">删除</button>
       </form>
     </td>
   </tr>
-  <%
-      }
-    } catch (Exception e) {
-      out.println("加载留言失败：" + e.getMessage());
-    }
-  %>
+  <% } rs.close(); ps.close(); conn.close(); %>
 </table>
 </body>
 </html>

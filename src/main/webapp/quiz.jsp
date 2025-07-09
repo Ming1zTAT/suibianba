@@ -70,5 +70,10 @@
         return false; // 阻止表单跳转
     }
 </script>
+<footer class="footer">
+    <p> Copyright ©魅影网络科技有限公司 <br>
+        我们立足于中华人民共和国，受当地法律保护！
+    </p>
+</footer>
 </body>
 </html>

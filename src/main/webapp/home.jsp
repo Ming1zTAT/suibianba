@@ -46,7 +46,7 @@
         const minutes = Math.floor((diff / (1000 * 60)) % 60);
         const seconds = Math.floor((diff / 1000) % 60);
 
-        let html = "🎂 距离永雏塔菲生日还有 <strong>" + pad(days) + "</strong> 天 ";
+        let html = "距离聊天记录清空还有 <strong>" + pad(days) + "</strong> 天 ";
         html += "<strong>" + pad(hours) + "</strong> 小时 ";
         html += "<strong>" + pad(minutes) + "</strong> 分 ";
         html += "<strong>" + pad(seconds) + "</strong> 秒！";
@@ -113,6 +113,11 @@
 
 
 <body>
+
+<div id="adminConsole" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#fff; border:2px solid #999; border-radius:10px; padding:20px; z-index:9999; box-shadow:0 0 15px rgba(0,0,0,0.3);">
+    <h3 style="margin-bottom:10px; text-align:center;">管理员控制台</h3>
+    <input id="consoleInput" type="text" placeholder="输入命令..." style="padding:8px 10px; width:300px; border-radius:5px; border:1px solid #ccc;">
+</div>
 <!-- 退出登录按钮 -->
 <div style="position: fixed; top: 10px; left: 10px; z-index: 999;">
     <form action="logout" method="get">
@@ -159,15 +164,16 @@
     <h2>🎉 欢迎，<%= username %>！</h2>
     <p style="text-align:center; color:#888;">你已成功登入GramTele 🧁</p>
     <div id="countdown" style="text-align: center; font-size: 18px; margin: 20px auto; padding: 10px; background-color: #fff8f8; border-radius: 8px; border: 1px solid #ffd6e0;">
-        🎂 正在加载倒计时...
+         正在加载倒计时...
     </div>
 
+    <!--
     <div style="text-align: center; margin-bottom: 20px;">
-        <a href="about.jsp" class="btn-about">了解我们</a>
-    </div>
+        <a href="about.jsp" class="btn-about">关于...</a>
+    </div> -->
 
-    <div class="chat-entry">
-        <a href="chat.jsp">💬 进入聊天室</a>
+    <div style="text-align: center; margin-bottom: 10px;">
+        <a href="chat.jsp" class="btn-about">进入聊天室</a>
     </div>
 
 
@@ -290,7 +296,9 @@
 
 
 
-    </div>
+
+
+</div>
     <!-- 应援图墙区域 -->
     <div class="gallery-section">
         <h3 style="text-align: center; margin-top: 40px;">📷 粉丝应援图墙</h3>
@@ -324,8 +332,61 @@
 
     }
 </script>
-
-
 </div>
+
+
+
+
+<script>
+    let consoleActive = false;
+    document.addEventListener("keydown", function(e) {
+        if (!consoleActive) {
+            window._keySequence = (window._keySequence || "") + e.key.toLowerCase();
+            if (window._keySequence.includes("console")) {
+
+                document.getElementById("adminConsole").style.display = "block";
+                setTimeout(() => {
+                    document.getElementById("consoleInput").focus();
+                }, 1000);
+
+                consoleActive = true;
+                window._keySequence = "";
+            }
+        } else if (e.key === "Escape") {
+            document.getElementById("adminConsole").style.display = "none";
+            consoleActive = false;
+        }
+    });
+
+    document.addEventListener("click", function(e) {
+        const popup = document.getElementById("adminConsole");
+        if (consoleActive && !popup.contains(e.target)) {
+            popup.style.display = "none";
+            consoleActive = false;
+        }
+    });
+
+    document.getElementById("consoleInput").addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            const val = this.value.trim().toLowerCase();
+            if (val === "wedding") {
+                window.location.href = "sihuo.jsp";
+            } else if (val.startsWith("admin -")) {
+                const key = val.split("-")[1].trim();
+                if (key === "040623") {
+                    window.location.href = "admin.jsp";
+                } else {
+                    alert("密钥无效");
+                }
+            } else {
+                alert("未知命令");
+            }
+            this.value = "";
+            document.getElementById("adminConsole").style.display = "none";
+            consoleActive = false;
+        }
+    });
+</script>
+
 </body>
 </html>
