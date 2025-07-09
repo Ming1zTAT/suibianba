@@ -11,7 +11,9 @@
   String selectedChatUserIdParam = request.getParameter("chatWith");
   int chatWithId = selectedChatUserIdParam != null ? Integer.parseInt(selectedChatUserIdParam) : -1;
 %>
+
 <html>
+
 <head>
   <title>聊天室</title>
   <style>
@@ -120,6 +122,7 @@
   </style>
 </head>
 <body>
+
 <div class="container">
   <!-- 左侧好友栏 -->
   <div class="sidebar">
@@ -217,7 +220,7 @@
     <!-- 消息输入区域 -->
     <form class="chat-form" method="post" action="ChatServlet" enctype="multipart/form-data">
       <input type="text" name="content" placeholder="输入消息..." id="chatInput">
-      <input type="hidden" name="receiverId" value="<%= chatWithId %>">
+      <input type="hidden" name="chatWithId" value="<%= chatWithId %>">
       <input type="file" name="image">
       <input type="submit" value="发送">
     </form>
@@ -225,13 +228,38 @@
 </div>
 
 <script>
-  const chatBox = document.getElementById("chatBox");
-  chatBox.scrollTop = chatBox.scrollHeight;
+  // 页面加载后滚动到底部并聚焦输入框
+  function initChatPage() {
+    const chatBox = document.getElementById("chatBox");
+    chatBox.scrollTop = chatBox.scrollHeight;
 
-  const input = document.getElementById("chatInput");
-  window.onload = () => {
-    input.focus(); // 自动聚焦
+    const input = document.querySelector('input[name="content"]');
+    if (input) input.focus();
+  }
+
+  window.onload = function () {
+    initChatPage(); // 初始聚焦和滚动
+    fetchMessages(); // 初始加载消息
   };
+
+  // 表单提交后延迟聚焦
+  const form = document.querySelector('.chat-form');
+  form.addEventListener('submit', function () {
+    setTimeout(() => {
+      const input = document.querySelector('input[name="content"]');
+      if (input) input.focus();
+    }, 150); // 延迟一点确保页面处理完成
+  });
 </script>
+
+
+
+
+<div style="position: absolute; top: 10px; left: 10px;">
+  <button onclick="location.href='home.jsp'" style="padding: 8px 16px; border-radius: 6px; background-color: #0088cc; color: white; border: none; font-weight: bold; cursor: pointer;">
+    🏠 返回主页
+  </button>
+</div>
+
 </body>
 </html>
