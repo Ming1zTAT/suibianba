@@ -1,5 +1,6 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ page import="java.sql.*, com.example.yytfsupportsite.yytf.util.DBUtil" %>
+
 <%
   if (session.getAttribute("userId") == null) {
     response.sendRedirect("login.jsp");
@@ -251,9 +252,43 @@
     }, 150); // 延迟一点确保页面处理完成
   });
 </script>
+<script>
+  const chatBox = $('#chatBox');
+  const input = $('#chatInput');
+  const chatWith = '<%= chatWithId %>';
 
+  function renderMessages(data) {
+    chatBox.empty();
+    data.forEach(msg => {
+      let html = `
+      <div class="message">
+        <div class="from">
+          <img src="${msg.avatar}" alt="头像">
+          ${msg.senderName}
+        </div>
+        ${msg.content||''}
+        <c:if test="${not empty msg.image}">
+    <br><img class="chat-img" src="${msg.image}" />
+</c:if>
 
+        <div class="timestamp">${msg.time}</div>
+      </div>`;
+      chatBox.append(html);
+    });
+    chatBox.scrollTop(chatBox.prop("scrollHeight"));
+  }
 
+  function fetchMsgs() {
+    $.getJSON('GetMessagesServlet', { chatWith }).done(renderMessages);
+  }
+
+  fetchMsgs();
+  setInterval(fetchMsgs, 1500);
+
+  $('.chat-form').submit(() => {
+    setTimeout(() => input.focus(), 100);
+  });
+</script>
 
 <div style="position: absolute; top: 10px; left: 10px;">
   <button onclick="location.href='home.jsp'" style="padding: 8px 16px; border-radius: 6px; background-color: #0088cc; color: white; border: none; font-weight: bold; cursor: pointer;">
