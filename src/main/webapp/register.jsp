@@ -7,7 +7,7 @@
 <body>
 
 <div class="container">
-    <h2>🎀 粉丝注册</h2>
+    <h2>注册</h2>
     <%-- 显示提示信息 --%>
     <p class="msg">
         <% String msg = (String) request.getAttribute("msg");

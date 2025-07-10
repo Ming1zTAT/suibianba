@@ -5,6 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import com.example.yytfsupportsite.yytf.websocket.ChatWebSocket;
 
 import java.io.*;
 import java.sql.*;
@@ -88,6 +89,27 @@ public class ChatServlet extends HttpServlet {
             }
             ps.executeUpdate();
             ps.close();
+            // 获取发送者昵称和头像
+            String senderName = (String) session.getAttribute("displayName");
+            if (senderName == null) senderName = (String) session.getAttribute("username");
+
+            String avatar = (String) session.getAttribute("avatar");
+            if (avatar == null || avatar.isEmpty()) avatar = "images/taffy1.jpg";
+
+// 当前时间
+            String now = new java.sql.Timestamp(System.currentTimeMillis()).toString();
+
+// 推送消息
+            ChatWebSocket.pushMessage(
+                    userId,
+                    chatWithId == -1 ? null : chatWithId,
+                    senderName,
+                    avatar,
+                    hasText ? content : "",
+                    imageUrl != null ? imageUrl : "",
+                    now
+            );
+
         } catch (Exception e) {
             e.printStackTrace();
         }

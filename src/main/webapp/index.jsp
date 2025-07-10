@@ -62,7 +62,7 @@
 <body>
 <div class="welcome-container">
     <img src="images/ico/logo.png" alt="GramTele Logo" class="logo-img">
-    <h1>欢迎来到 GramTele</h1>
+    <h1>欢迎来到 Gramtele</h1>
     <p>一个与世界连接的地方</p>
     <form action="login.jsp">
         <button type="submit" class="enter-btn">点击进入</button>

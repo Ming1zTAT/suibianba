@@ -153,7 +153,7 @@
   <div class="header">婚礼邀请函</div>
   <div class="border-line"></div>
   <div class="names">
-    &nbsp; <span class="heart">❤</span> &nbsp;
+    李孟都&nbsp; <span class="heart">❤</span> &nbsp;陆依韵
   </div>
   <div class="details">
     我们怀着无比喜悦的心情，<br>

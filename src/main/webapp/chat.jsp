@@ -167,6 +167,17 @@
           ResultSet r = p.executeQuery();
           if (r.next()) out.print("私聊：" + r.getString("show_name"));
           r.close(); p.close();
+
+        }
+      %>
+      <%
+        if (chatWithId != -1) {
+      %>
+      <button onclick="deleteFriend(<%= chatWithId %>)"
+              style="margin-left: 20px; padding: 5px 10px; background-color: #e74c3c; color: white; border: none; border-radius: 6px; font-size: 13px; cursor: pointer;">
+        删除好友
+      </button>
+      <%
         }
       %>
     </div>
@@ -289,6 +300,50 @@
     setTimeout(() => input.focus(), 100);
   });
 </script>
+<script>
+  const userId = <%= userId %>;
+  const chatWith = <%= chatWithId %>;
+  const socket = new WebSocket(`ws://${location.host}/chatSocket/${userId}`);
+
+  socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    if (data.chatWith == chatWith || chatWith == -1) {
+      // 仅当当前聊天窗口与消息对象一致时才展示
+      renderMessages([data]);
+    }
+  };
+
+  function sendMessage(content, image) {
+    const msg = {
+      senderId: userId,
+      chatWith: chatWith,
+      content: content,
+      image: image || null,
+      time: new Date().toLocaleString()
+    };
+    socket.send(JSON.stringify(msg));
+  }
+</script>
+<script>
+  function deleteFriend(friendId) {
+    if (confirm("确定要删除该好友吗？删除后将无法继续私聊。")) {
+      fetch('DeleteFriendServlet', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: 'friendId=' + encodeURIComponent(friendId)
+      })
+              .then(res => res.text())
+              .then(msg => {
+                alert(msg);
+                window.location.href = 'chat.jsp'; // 跳回群聊或首页
+              })
+              .catch(err => alert("删除失败：" + err));
+    }
+  }
+</script>
+
 
 <div style="position: absolute; top: 10px; right: 10px;">
   <button onclick="location.href='home.jsp'" style="padding: 8px 16px; border-radius: 6px; background-color: #0088cc; color: white; border: none; font-weight: bold; cursor: pointer;">
