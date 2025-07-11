@@ -305,11 +305,25 @@
   const chatWith = <%= chatWithId %>;
   const socket = new WebSocket(`ws://${location.host}/chatSocket/${userId}`);
 
+  function appendMessage(msg) {
+    const html =
+            '<div class="message">' +
+            '<div class="from">' +
+            '<img src="' + msg.avatar + '" alt="头像">' +
+            msg.senderName +
+            '</div>' +
+            (msg.content || '') +
+            (msg.image ? '<br><img class="chat-img" src="' + msg.image + '" />' : '') +
+            '<div class="timestamp">' + msg.time + '</div>' +
+            '</div>';
+
+    $('#chatBox').append(html);
+    $('#chatBox').scrollTop($('#chatBox')[0].scrollHeight);
+  }
   socket.onmessage = function(event) {
     const data = JSON.parse(event.data);
-    if (data.chatWith == chatWith || chatWith == -1) {
-      // 仅当当前聊天窗口与消息对象一致时才展示
-      renderMessages([data]);
+    if (data.senderId == userId || data.chatWith == chatWith || chatWith == -1) {
+      appendMessage(data);
     }
   };
 
