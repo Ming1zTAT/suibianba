@@ -85,6 +85,13 @@ public class ChatWebSocket {
         return s.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "");
     }
     public static void pushMessage(int senderId, Integer receiverId, String avatar, String content, String imageUrl, String time) {
+        System.out.println("Sending message...");
+        System.out.println("Sender ID: " + senderId);
+        System.out.println("Receiver ID: " + receiverId);
+        System.out.println("Avatar: " + avatar);
+        System.out.println("Content: " + content);
+        System.out.println("Image URL: " + imageUrl);
+        System.out.println("Time: " + time);
         // 从数据库查询发送者的 display_name
         String senderName = getSenderName(senderId);  // 新增方法，用于从数据库获取发送者的名字
 
@@ -97,12 +104,15 @@ public class ChatWebSocket {
                 "\"image\":\"" + escape(imageUrl) + "\"," +
                 "\"time\":\"" + escape(time) + "\"" +
                 "}";
+        System.out.println("Message JSON: " + json);
+
 
         if (receiverId == null || receiverId == -1) {
             broadcastToAll(json);  // 如果是群聊，则广播
         } else {
             sendPrivateMessage(senderId, receiverId, json);  // 否则发送私聊消息
         }
+
     }
 
     // 新增的方法，从数据库获取发送者的 display_name
