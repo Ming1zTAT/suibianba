@@ -94,7 +94,7 @@
                 box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
                 animation: fadeIn 0.5s ease;
             ">
-                🎊 彩蛋触发成功！<br>“塔菲喵最棒！应援永不停歇！”
+                🎊 彩蛋触发成功！<br>“关注永雏塔菲喵，关注永雏塔菲谢谢喵！”
             </div>
         `;
         document.body.appendChild(egg);

@@ -86,6 +86,7 @@ public class ChatWebSocket {
     public static void pushMessage(int senderId, Integer receiverId, String senderName, String avatar, String content, String imageUrl, String time) {
         String json = "{"
                 + "\"senderId\":" + senderId + ","
+                + "\"chatWith\":" + (receiverId == null ? -1 : receiverId) + ","
                 + "\"senderName\":\"" + escape(senderName) + "\","
                 + "\"avatar\":\"" + escape(avatar) + "\","
                 + "\"content\":\"" + escape(content) + "\","

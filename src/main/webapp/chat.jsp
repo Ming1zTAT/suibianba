@@ -121,6 +121,7 @@
       margin-top: 8px;
     }
   </style>
+
 </head>
 <body>
 
@@ -183,53 +184,15 @@
     </div>
 
     <div class="chat-messages" id="chatBox">
-      <%
-        PreparedStatement ps2;
-        if (chatWithId == -1) {
-          ps2 = conn.prepareStatement(
-                  "SELECT c.*, COALESCE(u.display_name, u.username) AS show_name, u.avatar " +
-                          "FROM chat_messages c JOIN users u ON c.user_id = u.id " +
-                          "WHERE c.receiver_id IS NULL ORDER BY c.timestamp ASC"
-          );
-        } else {
-          ps2 = conn.prepareStatement(
-                  "SELECT c.*, COALESCE(u.display_name, u.username) AS show_name, u.avatar " +
-                          "FROM chat_messages c JOIN users u ON c.user_id = u.id " +
-                          "WHERE (c.user_id=? AND c.receiver_id=?) OR (c.user_id=? AND c.receiver_id=?) " +
-                          "ORDER BY c.timestamp ASC"
-          );
-          ps2.setInt(1, userId);
-          ps2.setInt(2, chatWithId);
-          ps2.setInt(3, chatWithId);
-          ps2.setInt(4, userId);
-        }
-
-        ResultSet rs = ps2.executeQuery();
-        while (rs.next()) {
-          String senderName = rs.getString("show_name");
-          String avatar = rs.getString("avatar");
-          if (avatar == null || avatar.isEmpty()) {
-            avatar = "images/taffy1.jpg";
-          }
-      %>
-      <div class="message">
-        <div class="from">
-          <img src="<%= avatar %>" alt="头像">
-          <%= senderName %>
-        </div>
-        <%= rs.getString("content") != null ? rs.getString("content") : "" %>
-        <% if (rs.getString("image_url") != null && !rs.getString("image_url").isEmpty()) { %>
-        <br><img class="chat-img" src="<%= rs.getString("image_url") %>" alt="图">
-        <% } %>
-        <div class="timestamp"><%= rs.getTimestamp("timestamp") %></div>
-      </div>
-      <%
-        }
-        rs.close(); ps2.close(); conn.close();
-      %>
+      <!-- 留空，WebSocket 会动态添加 -->
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+
     <!-- 消息输入区域 -->
+
     <form class="chat-form" method="post" action="ChatServlet" enctype="multipart/form-data">
       <input type="text" name="content" placeholder="输入消息..." id="chatInput">
       <input type="hidden" name="chatWithId" value="<%= chatWithId %>">
@@ -251,7 +214,6 @@
 
   window.onload = function () {
     initChatPage(); // 初始聚焦和滚动
-    fetchMessages(); // 初始加载消息
   };
 
   // 表单提交后延迟聚焦
@@ -263,81 +225,8 @@
     }, 150); // 延迟一点确保页面处理完成
   });
 </script>
-<script>
-  const chatBox = $('#chatBox');
-  const input = $('#chatInput');
-  const chatWith = '<%= chatWithId %>';
 
-  function renderMessages(data) {
-    chatBox.empty();
-    data.forEach(msg => {
-      let html = `
-      <div class="message">
-        <div class="from">
-          <img src="${msg.avatar}" alt="头像">
-          ${msg.senderName}
-        </div>
-        ${msg.content||''}
-        <c:if test="${not empty msg.image}">
-    <br><img class="chat-img" src="${msg.image}" />
-</c:if>
 
-        <div class="timestamp">${msg.time}</div>
-      </div>`;
-      chatBox.append(html);
-    });
-    chatBox.scrollTop(chatBox.prop("scrollHeight"));
-  }
-
-  function fetchMsgs() {
-    $.getJSON('GetMessagesServlet', { chatWith }).done(renderMessages);
-  }
-
-  fetchMsgs();
-  setInterval(fetchMsgs, 1500);
-
-  $('.chat-form').submit(() => {
-    setTimeout(() => input.focus(), 100);
-  });
-</script>
-<script>
-  const userId = <%= userId %>;
-  const chatWith = <%= chatWithId %>;
-  const socket = new WebSocket(`ws://${location.host}/chatSocket/${userId}`);
-
-  function appendMessage(msg) {
-    const html =
-            '<div class="message">' +
-            '<div class="from">' +
-            '<img src="' + msg.avatar + '" alt="头像">' +
-            msg.senderName +
-            '</div>' +
-            (msg.content || '') +
-            (msg.image ? '<br><img class="chat-img" src="' + msg.image + '" />' : '') +
-            '<div class="timestamp">' + msg.time + '</div>' +
-            '</div>';
-
-    $('#chatBox').append(html);
-    $('#chatBox').scrollTop($('#chatBox')[0].scrollHeight);
-  }
-  socket.onmessage = function(event) {
-    const data = JSON.parse(event.data);
-    if (data.senderId == userId || data.chatWith == chatWith || chatWith == -1) {
-      appendMessage(data);
-    }
-  };
-
-  function sendMessage(content, image) {
-    const msg = {
-      senderId: userId,
-      chatWith: chatWith,
-      content: content,
-      image: image || null,
-      time: new Date().toLocaleString()
-    };
-    socket.send(JSON.stringify(msg));
-  }
-</script>
 <script>
   function deleteFriend(friendId) {
     if (confirm("确定要删除该好友吗？删除后将无法继续私聊。")) {
@@ -356,7 +245,22 @@
               .catch(err => alert("删除失败：" + err));
     }
   }
+
+
+  // 加载历史消息
+  function loadHistory() {
+    $.getJSON('GetMessagesServlet?chatWith=' + chatWith, function (data) {
+      data.forEach(msg => appendMessage(msg));
+    });
+  }
+
+  window.onload = function () {
+    initChatPage();
+    loadHistory(); // ✅ 加载历史消息
+  };
+
 </script>
+
 
 
 <div style="position: absolute; top: 10px; right: 10px;">
@@ -364,6 +268,42 @@
     🏠 返回主页
   </button>
 </div>
+
+<script>
+  const userId = <%= userId %>;     // 从 JSP 获取用户 ID
+  const chatWith = <%= chatWithId %>;
+
+  // ✅ 使用固定服务器地址
+  const socketUrl = `ws://8.137.11.50:8079/chatSocket/${userId}`;
+  console.log("📡 Connecting to fixed server:", socketUrl);
+
+  const socket = new WebSocket(socketUrl);
+
+  socket.onopen = () => console.log("✅ WebSocket连接成功");
+  socket.onerror = (e) => console.error("❌ WebSocket连接失败", e);
+
+  socket.onmessage = function (event) {
+    const data = JSON.parse(event.data);
+    if (data.senderId == userId || data.chatWith == chatWith || chatWith == -1) {
+      appendMessage(data);
+    }
+  };
+
+  function appendMessage(msg) {
+    const html =
+            '<div class="message">' +
+            '<div class="from">' +
+            '<img src="' + msg.avatar + '" alt="头像">' +
+            msg.senderName +
+            '</div>' +
+            (msg.content || '') +
+            (msg.image ? '<br><img class="chat-img" src="' + msg.image + '" />' : '') +
+            '<div class="timestamp">' + msg.time + '</div>' +
+            '</div>';
+    $('#chatBox').append(html);
+    $('#chatBox').scrollTop($('#chatBox')[0].scrollHeight);
+  }
+</script>
 
 </body>
 </html>
