@@ -94,30 +94,21 @@ public class ChatServlet extends HttpServlet {
             if (senderName == null) senderName = (String) session.getAttribute("username");
 
             String avatar = (String) session.getAttribute("avatar");
-            if (avatar == null || avatar.isEmpty()) avatar = "images/taffy1.jpg"; // 默认头像路径
-
-// 确保头像路径是绝对路径或相对正确路径
-            avatar = "http://8.137.11.50:8079/" + avatar;
-
+            if (avatar == null || avatar.isEmpty()) avatar = "images/taffy1.jpg";
 
 // 当前时间
             String now = new java.sql.Timestamp(System.currentTimeMillis()).toString();
 
 // 推送消息
             ChatWebSocket.pushMessage(
-
                     userId,
                     chatWithId == -1 ? null : chatWithId,
                     senderName,
                     avatar,
                     hasText ? content : "",
-                    imageUrl != null ? imageUrl : ""
-
+                    imageUrl != null ? imageUrl : "",
+                    now
             );
-            System.out.println("User ID: " + userId);
-            System.out.println("Chat with ID: " + chatWithId);
-            System.out.println("Message Content: " + content);
-            System.out.println("Image URL: " + imageUrl);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -130,5 +121,4 @@ public class ChatServlet extends HttpServlet {
             response.sendRedirect("chat.jsp?chatWith=" + chatWithId);
         }
     }
-
 }

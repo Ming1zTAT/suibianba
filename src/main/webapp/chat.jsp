@@ -298,15 +298,9 @@
   socket.onmessage = function (event) {
     console.log("📥 收到 WebSocket 消息: ", event.data);
 
-
     try {
       const data = JSON.parse(event.data);
       console.log("📡 收到解析后的数据: ", data);
-      console.log("Received message: ", data);
-      console.log("Sender ID: " + data.senderId);
-      console.log("Sender Name: " + data.senderName);
-      console.log("Avatar: " + data.avatar);
-      console.log("Content: " + data.content);
 
       // 私聊条件判断
       if ((data.senderId == userId && data.chatWith == chatWith) ||
