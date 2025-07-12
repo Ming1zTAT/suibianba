@@ -271,25 +271,68 @@
 
 <script>
   const userId = <%= userId %>;     // 从 JSP 获取用户 ID
-  const chatWith = <%= chatWithId %>;
+  const chatWith = <%= chatWithId %>; // 获取聊天的 ID
+  console.log("🧪 DEBUG userId =", userId);
+  console.log("🧪 DEBUG chatWith =", chatWith);
 
-  // ✅ 使用固定服务器地址
+  //  使用固定服务器地址
   const socketUrl = `ws://8.137.11.50:8079/chatSocket/${userId}`;
-  console.log("📡 Connecting to fixed server:", socketUrl);
+  console.log(" Connecting to fixed server:", socketUrl);
 
+  // 创建 WebSocket 实例
   const socket = new WebSocket(socketUrl);
 
-  socket.onopen = () => console.log("✅ WebSocket连接成功");
-  socket.onerror = (e) => console.error("❌ WebSocket连接失败", e);
+  // 监听 WebSocket 打开事件
+  socket.onopen = () => {
+    console.log(" WebSocket连接成功");
+    // 这里可以确认连接成功后发送消息或执行其他操作
+    socket.send(JSON.stringify({ action: "test", message: "WebSocket connected" }));
+  };
 
+  // 监听 WebSocket 错误事件
+  socket.onerror = (e) => {
+    console.error(" WebSocket连接失败", e);
+  };
+
+  // 监听 WebSocket 消息事件
   socket.onmessage = function (event) {
-    const data = JSON.parse(event.data);
-    if (data.senderId == userId || data.chatWith == chatWith || chatWith == -1) {
-      appendMessage(data);
+    console.log("📥 收到 WebSocket 消息: ", event.data);
+
+    try {
+      const data = JSON.parse(event.data);
+      console.log("📡 收到解析后的数据: ", data);
+
+      // 私聊条件判断
+      if ((data.senderId == userId && data.chatWith == chatWith) ||
+              (data.senderId == chatWith && data.chatWith == userId) ||
+              chatWith == -1) {
+        appendMessage(data);
+      } else {
+        console.log("❓ 收到非本用户或非当前聊天的消息，忽略。");
+      }
+    } catch (e) {
+      console.error("❌ 消息解析错误", e);
     }
   };
 
+  // 发送 WebSocket 消息的函数
+  function sendMessage(content, image) {
+    const msg = {
+      senderId: userId,
+      chatWith: chatWith,
+      content: content,
+      image: image || null,
+      time: new Date().toLocaleString()
+    };
+    console.log(" 发送消息: ", msg);
+
+    socket.send(JSON.stringify(msg));
+  }
+
+  // 添加消息到聊天区域
   function appendMessage(msg) {
+    console.log(" 显示新消息: ", msg);
+
     const html =
             '<div class="message">' +
             '<div class="from">' +
@@ -304,6 +347,7 @@
     $('#chatBox').scrollTop($('#chatBox')[0].scrollHeight);
   }
 </script>
+
 
 </body>
 </html>

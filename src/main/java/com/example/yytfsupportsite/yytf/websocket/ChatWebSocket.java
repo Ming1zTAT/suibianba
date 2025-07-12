@@ -1,10 +1,15 @@
 package com.example.yytfsupportsite.yytf.websocket;
 
+import com.example.yytfsupportsite.yytf.util.DBUtil;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import jakarta.websocket.*;
 
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -79,25 +84,45 @@ public class ChatWebSocket {
         if (s == null) return "";
         return s.replace("\"", "\\\"").replace("\n", "\\n").replace("\r", "");
     }
+    public static void pushMessage(int senderId, Integer receiverId, String avatar, String content, String imageUrl, String time) {
+        // 从数据库查询发送者的 display_name
+        String senderName = getSenderName(senderId);  // 新增方法，用于从数据库获取发送者的名字
+
+        String json = "{" +
+                "\"senderId\":" + senderId + "," +
+                "\"chatWith\":" + (receiverId == null ? -1 : receiverId) + "," +
+                "\"senderName\":\"" + escape(senderName) + "\"," +
+                "\"avatar\":\"" + escape(avatar) + "\"," +
+                "\"content\":\"" + escape(content) + "\"," +
+                "\"image\":\"" + escape(imageUrl) + "\"," +
+                "\"time\":\"" + escape(time) + "\"" +
+                "}";
+
+        if (receiverId == null || receiverId == -1) {
+            broadcastToAll(json);  // 如果是群聊，则广播
+        } else {
+            sendPrivateMessage(senderId, receiverId, json);  // 否则发送私聊消息
+        }
+    }
+
+    // 新增的方法，从数据库获取发送者的 display_name
+    private static String getSenderName(int senderId) {
+        String senderName = "";
+        try (Connection conn = DBUtil.getConnection()) {
+            PreparedStatement ps = conn.prepareStatement("SELECT display_name FROM users WHERE id = ?");
+            ps.setInt(1, senderId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                senderName = rs.getString("display_name");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return senderName;
+    }
 
     /**
      * ✅ 外部调用接口（Servlet用）：统一调用这个方法推送 JSON 消息
      */
-    public static void pushMessage(int senderId, Integer receiverId, String senderName, String avatar, String content, String imageUrl, String time) {
-        String json = "{"
-                + "\"senderId\":" + senderId + ","
-                + "\"chatWith\":" + (receiverId == null ? -1 : receiverId) + ","
-                + "\"senderName\":\"" + escape(senderName) + "\","
-                + "\"avatar\":\"" + escape(avatar) + "\","
-                + "\"content\":\"" + escape(content) + "\","
-                + "\"image\":\"" + escape(imageUrl) + "\","
-                + "\"time\":\"" + escape(time) + "\""
-                + "}";
 
-        if (receiverId == null || receiverId == -1) {
-            broadcastToAll(json);
-        } else {
-            sendPrivateMessage(senderId, receiverId, json);
-        }
-    }
 }
