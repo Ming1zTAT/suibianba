@@ -96,7 +96,7 @@
         <input type="text" value="<%= username %>" disabled><br>
 
         <label>昵称：</label><br>
-        <input type="text" name="displayName" value="<%= displayName %>" required><br>
+        <input type="text" name="displayName" value="<%= displayName %>" required disabled><br>
 
         <label>更换头像：</label><br>
         <input type="file" name="avatar" accept="image/*"><br>

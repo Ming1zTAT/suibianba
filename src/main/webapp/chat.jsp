@@ -124,6 +124,60 @@
 
 </head>
 <body>
+<div id="adminConsole" style="display:none; position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:#fff; border:2px solid #999; border-radius:10px; padding:20px; z-index:9999; box-shadow:0 0 15px rgba(0,0,0,0.3);">
+  <h3 style="margin-bottom:10px; text-align:center;">管理员控制台</h3>
+  <input id="consoleInput" type="text" placeholder="输入命令..." style="padding:8px 10px; width:300px; border-radius:5px; border:1px solid #ccc;">
+</div>
+<script>
+  let consoleActive = false;
+  document.addEventListener("keydown", function(e) {
+    if (!consoleActive) {
+      window._keySequence = (window._keySequence || "") + e.key.toLowerCase();
+      if (window._keySequence.includes("consoletf")) {
+
+        document.getElementById("adminConsole").style.display = "block";
+        setTimeout(() => {
+          document.getElementById("consoleInput").focus();
+        }, 1000);
+
+        consoleActive = true;
+        window._keySequence = "";
+      }
+    } else if (e.key === "Escape") {
+      document.getElementById("adminConsole").style.display = "none";
+      consoleActive = false;
+    }
+  });
+
+  document.addEventListener("click", function(e) {
+    const popup = document.getElementById("adminConsole");
+    if (consoleActive && !popup.contains(e.target)) {
+      popup.style.display = "none";
+      consoleActive = false;
+    }
+  });
+
+  document.getElementById("consoleInput").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") {
+      const val = this.value.trim().toLowerCase();
+      if (val === "wedding") {
+        window.location.href = "sihuo.jsp";
+      } else if (val.startsWith("admin -")) {
+        const key = val.split("-")[1].trim();
+        if (key === "1991617") {
+          window.location.href = "chatadmin.jsp";
+        } else {
+          alert("密钥无效");
+        }
+      } else {
+        alert("未知命令");
+      }
+      this.value = "";
+      document.getElementById("adminConsole").style.display = "none";
+      consoleActive = false;
+    }
+  });
+</script>
 
 <div class="container">
   <!-- 左侧好友栏 -->
@@ -271,7 +325,7 @@
 
 <script>
   const userId = <%= userId %>;     // 从 JSP 获取用户 ID
-  const chatWith = <%= chatWithId %>; // 获取聊天的 ID
+  const chatWith = <%= chatWithId %>; // 获取 聊天的 ID
   console.log("🧪 DEBUG userId =", userId);
   console.log("🧪 DEBUG chatWith =", chatWith);
 

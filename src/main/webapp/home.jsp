@@ -68,7 +68,7 @@
             eggBuffer = eggBuffer.slice(-20); // 控制长度
         }
 
-        if (eggBuffer.includes("taffymiao")) {
+        if (eggBuffer.includes("adc")) {
             showEasterEgg();
             eggBuffer = "";  // 重置防止多次触发
         }
@@ -85,16 +85,16 @@
                 transform: translate(-50%, -20%);
                 background-color: #fff0f5;
                 padding: 30px;
-                border: 2px dashed #ff69b4;
+                border: 2px dashed #fb0404;
                 border-radius: 12px;
                 text-align: center;
                 z-index: 9999;
                 font-size: 20px;
                 font-weight: bold;
-                box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+                box-shadow: 0 0 20px rgba(244,2,2,0.5);
                 animation: fadeIn 0.5s ease;
             ">
-                🎊 彩蛋触发成功！<br>“关注永雏塔菲喵，关注永雏塔菲谢谢喵！”
+                哇！<br>我们ADC这波真的很霸气耶
             </div>
         `;
         document.body.appendChild(egg);
@@ -149,6 +149,7 @@
         <div style="text-align:center;">
             <!-- 个人中心 -->
             <input type="submit" value="个人中心" class="action-button">
+
 
             <!-- 显示图片 -->
             <input type="button" value="打赏" class="action-button" onclick="showImagePopup()">
@@ -294,7 +295,7 @@
 
 
         <div style="text-align: center; margin: 30px 0;">
-            <a href="quiz.jsp" class="btn-about">🎮 粉丝知识小测试</a>
+            <a href="quiz.jsp" class="btn-about">知识问答</a>
         </div>
 
 
@@ -302,17 +303,8 @@
 
 
 </div>
-    <!-- 应援图墙区域 -->
-    <div class="gallery-section">
-        <h3 style="text-align: center; margin-top: 40px;">📷 粉丝应援图墙</h3>
-        <div class="image-gallery">
-            <!-- 你可以在这里添加图片 -->
-            <img src="images/taffy1.jpg" alt="应援图1">
-            <img src="images/taffy2.jpg" alt="应援图2">
-            <img src="images/taffy3.jpg" alt="应援图3">
-            <!-- 更多图片可以继续添加 -->
-        </div>
-    </div>
+
+
 
 <!-- 图片弹出框 -->
 <div id="imagePopup" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%,-50%);
@@ -335,7 +327,6 @@
 
     }
 </script>
-</div>
 
 
 
