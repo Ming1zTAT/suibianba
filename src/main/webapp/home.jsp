@@ -163,7 +163,7 @@
 
 <div class="container">
     <h2>🎉 欢迎，<%= username %>！</h2>
-    <p style="text-align:center; color:#888;">你已成功登入Gramtele 🧁</p>
+    <p style="text-align:center; color:#888;">您已成功登入Gramtele 🧁</p>
     <div id="countdown" style="text-align: center; font-size: 18px; margin: 20px auto; padding: 10px; background-color: #fff8f8; border-radius: 8px; border: 1px solid #ffd6e0;">
          正在加载倒计时...
     </div>
